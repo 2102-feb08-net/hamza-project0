@@ -1,0 +1,27 @@
+in the console when the program is first ran:
+	ask if they want to search a Customer or Location (and input userid or location name) or if they want to place an order
+	if they want to search:
+		for Customer, display all info (except order history which will be asked if they wanna see it)
+		for Location, display all info including inventory (except order history ^^^)
+	for placing orders:
+		ask for userid or if they want to create a new Customer
+		if they want to create new customer:
+			ask userid (check valid), first and last name
+		ask for location then list the inventory
+		ask what they would like to add and quantity
+		list their cart and ask if they are done (if not, repeat from the last step).
+		once done, place the order
+	after placing order, return to the first step
+
+
+
+
+
+
+
+
+Notes:
+later can have default location for customer
+check all user inputs
+have a way to go back in the menu
+all data must persist (probably in a file)
