@@ -7,14 +7,23 @@ namespace GameStore.Library.Model
     public class Location
     {
         private Dictionary<Product, int> _inventory = new();
+        public string Name { get;}
+        public int Id { get; }
 
-        public string Name { get; set; }
-        public int Id { get => counter; set => counter++; }
-        public static int counter = 0;
+        public Location(string name, int id)
+        {
+            Name = name;
+            Id = id;
+        }
 
-        //public Location()
-        //{
+        public void AddProduct(Product product, int amount)
+        {
+            _inventory.Add(product, amount);
+        }
 
-        //}
+        public Dictionary<Product, int> GetInventory() => _inventory;
+
+
+
     }
 }

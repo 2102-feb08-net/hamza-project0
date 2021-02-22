@@ -9,7 +9,7 @@ namespace GameStore.Library.Model
     {
         public Customer Customer { get; }
         public Location Location { get; }
-        private Dictionary<Product, int> _products = new();
+        private Dictionary<Product, int> _shoppingCart = new();
         private DateTimeOffset _timeOrderPlaced;
         
 
@@ -29,10 +29,10 @@ namespace GameStore.Library.Model
 
         public void AddProduct(Product product, int amount)
         {
-            _products.Add(product, amount);
+            _shoppingCart.Add(product, amount);
         }
 
         public DateTimeOffset GetTimeOrderPlaced() => _timeOrderPlaced;
-        public Dictionary<Product, int> GetProducts() => _products;
+        public Dictionary<Product, int> GetShoppingCart() => _shoppingCart;
     }
 }
