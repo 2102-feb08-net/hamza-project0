@@ -6,23 +6,28 @@ namespace GameStore.Library.Model
 {
     public class Location
     {
-        private Dictionary<Product, int> _inventory = new();
-        public string Name { get;}
-        public int Id { get; }
+        public int Id { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public List<Product> Products { get; set; }
+        public List<int> ProductQuanties { get; set; }
+        public Dictionary<Product, int> Inventory { get; set; } = new();
 
-        public Location(string name, int id)
+
+        //public Location(int id, string city, string state)
+        //{
+        //    Id = id;
+        //    City = city;
+        //    State = state;
+        //}
+
+        public void BuildInventory()
         {
-            Name = name;
-            Id = id;
+            for(int i = 0; i < Products.Count; i++)
+            {
+                Inventory.Add(Products[i], ProductQuanties[i]);
+            }
         }
-
-        public void AddProduct(Product product, int amount)
-        {
-            _inventory.Add(product, amount);
-        }
-
-        public Dictionary<Product, int> GetInventory() => _inventory;
-
 
 
     }

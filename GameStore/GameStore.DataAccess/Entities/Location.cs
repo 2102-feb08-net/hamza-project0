@@ -10,6 +10,7 @@ namespace GameStore.DataAccess.Entities
         public Location()
         {
             LocationInventories = new HashSet<LocationInventory>();
+            Orders = new HashSet<Order>();
         }
 
         public int Id { get; set; }
@@ -17,5 +18,6 @@ namespace GameStore.DataAccess.Entities
         public string State { get; set; }
 
         public virtual ICollection<LocationInventory> LocationInventories { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using GameStore.DataAccess.Entities;
 using GameStore.DataAccess.Repositories;
 using GameStore.Library.Interfaces;
 using GameStore.Library.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameStore
 {
@@ -11,8 +14,8 @@ namespace GameStore
     {
         static void Main(string[] args)
         {
-
-            IGameStoreRepository gameStoreRepository = new GameStoreRepository();
+            using var dependencies = new Dependencies();
+            IGameStoreRepository gameStoreRepository = dependencies.CreateGameStoreRepository();
             RunUi(gameStoreRepository);
         }
 
@@ -32,12 +35,8 @@ namespace GameStore
                 var input = Console.ReadLine();
                 if (input.StartsWith("sc "))
                 {
-                    //var name = input.Split(' ', 2)[1];
-                    //var customerList = gameStoreRepository.SearchCustomerName().ToList();
-                    var customerList = new List<Customer>();
-                    customerList.Add(CreateCustomer()); //testing
-                    customerList.Add(CreateCustomer()); //testing
-                    customerList.Add(CreateCustomer()); //testing
+                    var name = input.Split(' ', 2)[1];
+                    var customerList = gameStoreRepository.SearchCustomerName(name).ToList();
 
                     Console.WriteLine();
                     // if no customer with that name
@@ -56,10 +55,10 @@ namespace GameStore
                             Console.WriteLine();
                             Console.WriteLine("#\t\tUserId\t\tName");
 
-                            for (int i = 0; i < customerList.Count; i++)
+                            for (int i = 1; i <= customerList.Count; i++)
                             {
 
-                                Console.WriteLine($"{i}:\t\t{customerList[i].UserId}\t\t{customerList[i].GetFullName()}");
+                                Console.WriteLine($"{i}:\t\t{customerList[i-1].UserName}\t\t{customerList[i-1].GetFullName()}");
                             }
                             Console.WriteLine();
 
@@ -68,26 +67,26 @@ namespace GameStore
 
                             // valid customer #, print their history
                             if (int.TryParse(input, out var customerNum)
-                                    && customerNum >= 0 && customerNum < customerList.Count)
+                                    && customerNum >= 1 && customerNum <= customerList.Count)
                             {
-                                Customer customer = customerList[customerNum];
-                                //var customerOrderHistory = gameStoreRepository.GetCustomerOrderHistory(customer).ToList();
-                                var customerOrderHistory = new List<Order>(); //testing
-                                customerOrderHistory.Add(CreateOrder(customer, 0)); //testing
-                                customerOrderHistory.Add(CreateOrder(customer, 1)); // testing
-                                customerOrderHistory.Add(CreateOrder(customer, 2)); //testing 
+                                Library.Model.Customer customer = customerList[customerNum-1];
+                                var customerOrderHistory = gameStoreRepository.GetCustomerOrderHistory(customer).ToList();
+                                foreach (var order in customerOrderHistory)
+                                {
+                                    order.BuildShoppingCart();
+                                }
 
                                 Console.WriteLine();
                                 Console.WriteLine($"This is the order history of {customer.GetFullName()}:");
                                 Console.WriteLine();
 
-                                for (int i = 0; i < customerOrderHistory.Count(); i++)
+                                for (int i = 1; i <= customerOrderHistory.Count(); i++)
                                 {
-                                    Console.WriteLine($"Order {i}\t\tLocation: {customerOrderHistory[i].Location.Id}\t" +
-                                        $"Time: {customerOrderHistory[i].GetTimeOrderPlaced()}");
+                                    Console.WriteLine($"Order {i}\t\tLocationID: {customerOrderHistory[i-1].LocationId}\t" +
+                                        $"Time: {customerOrderHistory[i-1].TimePlaced}");
                                     Console.WriteLine();
                                     Console.WriteLine("Product:\tQuantity:");
-                                    foreach (KeyValuePair<Product, int> product in customerOrderHistory[i].GetShoppingCart())
+                                    foreach (KeyValuePair<Library.Model.Product, int> product in customerOrderHistory[i-1].ShoppingCart)
                                     {
                                         Console.WriteLine($"{product.Key.Name}\t\t{product.Value}");
                                     }
@@ -114,50 +113,54 @@ namespace GameStore
                 {
                     Console.WriteLine();
 
-                    //var allLocations = gameStoreRepository.GetAllLocations().ToList();
-                    var allLocations = new List<Location>(); //testing
-                    allLocations.Add(CreateLocation(0)); //testing
-                    allLocations.Add(CreateLocation(1)); // testing
-                    allLocations.Add(CreateLocation(2)); //testing 
+                    var allLocations = gameStoreRepository.GetAllLocations().ToList();
 
                     while (true)
                     {
                         Console.WriteLine("Listing all Locations");
                         Console.WriteLine();
-                        Console.WriteLine("#\tId\tName");
-                        for (int i = 0; i < allLocations.Count; i++)
+                        Console.WriteLine("#\t\tId\t\tCity\t\tState");
+                        for (int i = 1; i <= allLocations.Count; i++)
                         {
-                            Console.WriteLine($"{i}\t{allLocations[i].Id}\t{allLocations[i].Name}");
+                            Console.WriteLine($"{i}\t\t{allLocations[i-1].Id}\t\t{allLocations[i-1].City}\t\t{allLocations[i-1].State}");
                         }
 
                         Console.Write("Pick a location number to show its order history, or \"m\" to go to main menu: ");
                         input = Console.ReadLine();
                         // valid location number
                         if (int.TryParse(input, out var locationNum)
-                                        && locationNum >= 0 && locationNum < allLocations.Count)
+                                        && locationNum >= 1 && locationNum <= allLocations.Count)
                         {
-                            Location location = allLocations[locationNum];
-                            //var locationOrderHistory = gameStoreRepository.GetLocationOrderHistory(location).ToList();
-                            var locationOrderHistory = new List<Order>(); //testing
-                            Customer customer = CreateCustomer();
-                            locationOrderHistory.Add(CreateOrder(customer, 0)); //testing
-                            locationOrderHistory.Add(CreateOrder(customer, 1)); // testing
-                            locationOrderHistory.Add(CreateOrder(customer, 2)); //testing 
+                            Library.Model.Location location = allLocations[locationNum-1];
+                            var locationOrderHistory = gameStoreRepository.GetLocationOrderHistory(location).ToList();
 
-
-                            Console.WriteLine();
-                            Console.WriteLine($"This is the order history of store located in {location.Name}:");
-                            Console.WriteLine();
-
-                            for (int i = 0; i < locationOrderHistory.Count(); i++)
+                            if (locationOrderHistory.Count == 0)
                             {
-                                Console.WriteLine($"Order {i}\t\tCustomer: {locationOrderHistory[i].Customer.GetFullName()}\t" +
-                                    $"Time: {locationOrderHistory[i].GetTimeOrderPlaced()}");
                                 Console.WriteLine();
-                                Console.WriteLine("Product:\tQuantity:");
-                                foreach (KeyValuePair<Product, int> product in locationOrderHistory[i].GetShoppingCart())
+                                Console.WriteLine("This location has no order history.");
+                                Console.WriteLine();
+                                break;
+                            }
+
+                            foreach (var order in locationOrderHistory)
+                            {
+                                order.BuildShoppingCart();
+                            }
+
+
+                            Console.WriteLine();
+                            Console.WriteLine($"This is the order history of store located in {location.City}, {location.State}:");
+                            Console.WriteLine();
+
+                            for (int i = 1; i <= locationOrderHistory.Count(); i++)
+                            {
+                                Console.WriteLine($"Order {i}\t\tCustomerId: {locationOrderHistory[i-1].CustomerId}\t\t" +
+                                    $"Time: {locationOrderHistory[i-1].TimePlaced}");
+                                Console.WriteLine();
+                                Console.WriteLine("Product:\t\tQuantity:");
+                                foreach (KeyValuePair<Library.Model.Product, int> item in locationOrderHistory[i-1].ShoppingCart)
                                 {
-                                    Console.WriteLine($"{product.Key.Name}\t\t{product.Value}");
+                                    Console.WriteLine($"{item.Key.Name}\t\t{item.Value}");
                                 }
                                 Console.WriteLine();
                             }
@@ -183,11 +186,11 @@ namespace GameStore
                 }
                 else if (input == "nc")
                 {
-                    Customer customer = new Customer();
+                    Library.Model.Customer customer = new();
                     Console.WriteLine();
                     Console.WriteLine("Creating a new customer.");
 
-                    // If first name input is wrong, jump back here
+                // If first name input is wrong, jump back here
                 FirstName:
                     Console.WriteLine();
                     Console.Write("Enter customer's first name (2-20 characters): ");
@@ -204,7 +207,7 @@ namespace GameStore
                         goto FirstName;
                     }
 
-                    // If last name input is wrong, jump back here
+                // If last name input is wrong, jump back here
                 LastName:
                     Console.WriteLine();
                     Console.Write("Enter customer's last name (2-20 characters): ");
@@ -221,25 +224,57 @@ namespace GameStore
                         goto LastName;
                     }
 
-                    // If user id input is wrong, jump back here
-                UserId:
+                // If user id input is wrong, jump back here
+                UserName:
                     Console.WriteLine();
                     Console.Write("Enter customer's user id (5-15 characters): ");
-                    var userId = Console.ReadLine();
+                    var userName = Console.ReadLine();
                     Console.WriteLine();
                     try
                     {
-                        customer.UserId = userId;
+                        customer.UserName = userName;
                     }
                     catch (ArgumentException ae)
                     {
                         Console.WriteLine(ae.Message);
                         Console.WriteLine();
-                        goto UserId;
+                        goto UserName;
+                    }
+
+                City:
+                    Console.WriteLine();
+                    Console.Write("Enter customer's city (2-20 characters): ");
+                    var city = Console.ReadLine();
+                    Console.WriteLine();
+                    try
+                    {
+                        customer.City = city;
+                    }
+                    catch (ArgumentException ae)
+                    {
+                        Console.WriteLine(ae.Message);
+                        Console.WriteLine();
+                        goto City;
+                    }
+
+                State:
+                    Console.WriteLine();
+                    Console.Write("Enter customer's state (2-20 characters): ");
+                    var state = Console.ReadLine();
+                    Console.WriteLine();
+                    try
+                    {
+                        customer.State = state;
+                    }
+                    catch (ArgumentException ae)
+                    {
+                        Console.WriteLine(ae.Message);
+                        Console.WriteLine();
+                        goto State;
                     }
 
                     Console.WriteLine("Are you sure you want to create the following customer?");
-                    Console.WriteLine($"UserId: {userId}\t\tName: {customer.GetFullName()}");
+                    Console.WriteLine($"Username: {userName}\t\tName: {customer.GetFullName()}\t\tCity: {city}\t\tState: {state}");
                     Console.WriteLine();
                     Console.Write("\"y\" for yes, \"n\" for no: ");
                     input = Console.ReadLine();
@@ -247,7 +282,8 @@ namespace GameStore
 
                     if (input == "y")
                     {
-                        //gameStoreRepository.CreateCustomer(customer);
+                        gameStoreRepository.CreateCustomer(customer);
+                        gameStoreRepository.Save();
                         Console.WriteLine("Customer Created!");
                         Console.WriteLine();
                     }
@@ -274,17 +310,17 @@ namespace GameStore
             }
         }
 
-        private static Location CreateLocation(int num)
-        {
-            var location = new Location("New York", num);
-            return location;
-        }
+        //private static Location CreateLocation(int num)
+        //{
+        //    var location = new Location("New York", num);
+        //    return location;
+        //}
 
-        private static Customer CreateCustomer()
-        {
-            var customer = new Customer("hamza1", "Hamza", "Butt");
-            return customer;
-        }
+        //private static Customer CreateCustomer()
+        //{
+        //    var customer = new Customer("hamza1", "Hamza", "Butt");
+        //    return customer;
+        //}
 
         private static void PrintInvalid(string input)
         {
@@ -293,19 +329,19 @@ namespace GameStore
             Console.WriteLine();
         }
 
-        private static Order CreateOrder(Customer customer, int num)
-        {
-            Location location = CreateLocation(num);
-            var order = new Order(customer, location);
-            Product product = new("League");
-            Product product2 = new("Smite");
-            Product product3 = new("Pizza");
-            Product product4 = new("COD");
-            order.AddProduct(product, 2);
-            order.AddProduct(product2, 3);
-            order.AddProduct(product3, 4);
-            order.AddProduct(product4, 5);
-            return order;
-        }
+        //private static Order CreateOrder(Customer customer, int num)
+        //{
+        //    Location location = CreateLocation(num);
+        //    var order = new Order(customer, location);
+        //    Product product = new("League");
+        //    Product product2 = new("Smite");
+        //    Product product3 = new("Pizza");
+        //    Product product4 = new("COD");
+        //    order.AddProduct(product, 2);
+        //    order.AddProduct(product2, 3);
+        //    order.AddProduct(product3, 4);
+        //    order.AddProduct(product4, 5);
+        //    return order;
+        //}
     }
 }

@@ -11,7 +11,7 @@ namespace GameStore.Library.Interfaces
     {
 
 
-        IEnumerable<Library.Model.Customer> SearchCustomerName();
+        IEnumerable<Library.Model.Customer> SearchCustomerName(string name);
 
         IEnumerable<Library.Model.Order> GetCustomerOrderHistory(Customer customer);
 
@@ -20,5 +20,7 @@ namespace GameStore.Library.Interfaces
         IEnumerable<Library.Model.Order> GetLocationOrderHistory(Location location);
 
         void CreateCustomer(Customer customer);
+
+        void Save();
     }
 }

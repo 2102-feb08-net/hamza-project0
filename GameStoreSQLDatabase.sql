@@ -25,9 +25,11 @@ CREATE TABLE Locations(
 CREATE TABLE Orders(
 	id INT IDENTITY PRIMARY KEY,
 	customer_id INT NOT NULL,
+	location_id INT NOT NULL,
 	time_placed DATETIME2 NOT NULL,
 	total_price FLOAT NOT NULL,
 	FOREIGN KEY (customer_id) REFERENCES Customers(id),
+	FOREIGN KEY (location_id) REFERENCES Locations(id)
 );
 
 -- m-n Orders and Products
@@ -35,6 +37,7 @@ CREATE TABLE OrderLine(
 	id INT IDENTITY PRIMARY KEY,
 	order_id INT NOT NULL,
 	product_id INT NOT NULL,
+	quantity INT NOT NULL,
 	FOREIGN KEY (order_id) REFERENCES Orders(id),
 	FOREIGN KEY (product_id) REFERENCES Products(id)
 );
@@ -44,6 +47,7 @@ CREATE TABLE LocationInventory(
 	id INT IDENTITY PRIMARY KEY,
 	location_id INT NOT NULL,
 	product_id INT NOT NULL,
+	quantity INT NOT NULL,
 	FOREIGN KEY (location_id) REFERENCES Locations(id),
 	FOREIGN KEY (product_id) REFERENCES Products(id)
 );
@@ -70,35 +74,35 @@ INSERT INTO Locations(city, state) VALUES
 	('Houston', 'Texas'),
 	('Charlotte', 'North Carolina');
 
-INSERT INTO Orders(customer_id, time_placed, total_price) VALUES
-	(1, '2021-01-15T19:58:47', 86.95), -- Hamza bought MC and SSBU
-	(1, '2021-02-07T13:37:21', 39.99), -- Hamza bought DS3
-	(3, '2021-01-19T04:14:00', 46.95), -- Jane bought COD and MC
-	(4, '2021-02-25T10:26:16', 86.94);  -- Tina bought COD, MC, DS3
+INSERT INTO Orders(customer_id, location_id, time_placed, total_price) VALUES
+	(1, 1, '2021-01-15T19:58:47', 140.95), -- Hamza bought 1 MC and 2 SSBU from yonkers
+	(1, 1, '2021-02-07T13:37:21', 39.99), -- Hamza bought 1 DS3 from yonkers
+	(3, 3, '2021-01-19T04:14:00', 66.95), -- Jane bought 2 COD and 1 MC from houston
+	(4, 2, '2021-02-25T10:26:16', 186.92);  -- Tina bought 2 COD, 1 MC, 3 DS3 from philadelphia
 
-INSERT INTO LocationInventory(location_id, product_id) VALUES
-	(1, 2),
-	(1, 3),  -- Yonkers has MC,SSBU,DS3
-	(1, 4),
-	(2, 1),
-	(2, 2),	 -- Philadelphia has COD,MC,SSBU,DS3
-	(2, 3),
-	(2, 4),
-	(3, 1),
-	(3, 2),	 --	Houston has COD,MC,DS3
-	(3, 4),
-	(4, 1),
-	(4, 3);  -- Charlotte has COD,SSBU
+INSERT INTO LocationInventory(location_id, product_id, quantity) VALUES
+	(1, 2, 5),
+	(1, 3, 5),  -- Yonkers has MC,SSBU,DS3
+	(1, 4, 5),
+	(2, 1, 5),
+	(2, 2, 5),	 -- Philadelphia has COD,MC,SSBU,DS3
+	(2, 3, 5),
+	(2, 4, 5),
+	(3, 1, 5),
+	(3, 2, 5),	 --	Houston has COD,MC,DS3
+	(3, 4, 5),
+	(4, 1, 5),
+	(4, 3, 5);  -- Charlotte has COD,SSBU
 
-INSERT INTO OrderLine(order_id, product_id) VALUES
-	(1, 2),		-- Hamza bought MC and SSBU
-	(1, 3),
-	(2, 4),		-- Hamza bought DS3
-	(3, 1),
-	(3, 2),		-- Jane bought COD and MC
-	(4, 1),
-	(4, 2),		-- Tina bought COD, MC, DS3
-	(4, 4);
+INSERT INTO OrderLine(order_id, product_id, quantity) VALUES
+	(1, 2, 1),		-- Hamza bought MC and SSBU
+	(1, 3, 2),
+	(2, 4, 1),		-- Hamza bought DS3
+	(3, 1, 2),
+	(3, 2, 1),		-- Jane bought COD and MC
+	(4, 1, 2),
+	(4, 2, 1),		-- Tina bought COD, MC, DS3
+	(4, 4, 3);
 
 
 SELECT * FROM Customers;
@@ -108,8 +112,9 @@ SELECT * FROM Orders;
 SELECT * FROM LocationInventory;
 SELECT * FROM OrderLine;
 
-
-
+DROP TABLE LocationInventory;
+DROP TABLE OrderLine;
+DROP TABLE Orders;
 
 
 

@@ -14,10 +14,12 @@ namespace GameStore.DataAccess.Entities
 
         public int Id { get; set; }
         public int CustomerId { get; set; }
+        public int LocationId { get; set; }
         public DateTime TimePlaced { get; set; }
         public double TotalPrice { get; set; }
 
         public virtual Customer Customer { get; set; }
+        public virtual Location Location { get; set; }
         public virtual ICollection<OrderLine> OrderLines { get; set; }
     }
 }

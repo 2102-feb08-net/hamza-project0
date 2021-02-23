@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace GameStore.Library.Model
 {
     public class Customer
     {
-        private string _userId;
+        public int Id { get; set; }
         private string _firstName;
         private string _lastName;
+        private string _userName;
+        private string _city;
+        private string _state;
 
-        public string FirstName 
-        { 
+        public string FirstName
+        {
             get => _firstName;
-            set 
+            set
             {
                 if (!value.All(Char.IsLetter))
                 {
@@ -48,30 +52,78 @@ namespace GameStore.Library.Model
             }
         }
 
-        public string UserId
+        public string UserName
         {
-            get => _userId;
+            get => _userName;
             set
             {
-                if (value.Length < 5 || value.Length > 15)
+                if (!value.All(Char.IsLetterOrDigit))
                 {
-                    throw new ArgumentException("||Input size must be 5-15 for User Ids||");
+                    throw new ArgumentException("||Can only input English letters and numbers for usernames||");
+                }
+                else if (value.Length < 5 || value.Length > 15)
+                {
+                    throw new ArgumentException("||Input size must be 5-15 for usernames||");
                 }
                 else
                 {
-                    _userId = value;
+                    _userName = value;
                 }
             }
         }
 
-        public Customer() { }
-
-        public Customer(string userId, string firstName, string lastName)
+        public string City
         {
-            UserId = userId;
-            FirstName = firstName;
-            LastName = lastName;
+            get => _city;
+            set
+            {
+                string pattern = "^[A-Za-z ]+$";
+                Regex regex = new Regex(pattern);
+                if (!regex.IsMatch(value))
+                {
+                    throw new ArgumentException("||Can only input English letters for cities||");
+                }
+                else if (value.Length < 2 || value.Length > 20)
+                {
+                    throw new ArgumentException("||Input size must be 2-20 letters for cities||");
+                }
+                else
+                {
+                    _city = value;
+                }
+            }
         }
+
+        public string State
+        {
+            get => _state;
+            set
+            {
+                string pattern = "^[A-Za-z ]+$";
+                Regex regex = new Regex(pattern);
+                if (!regex.IsMatch(value))
+                {
+                    throw new ArgumentException("||Can only input English letters for states||");
+                }
+                else if (value.Length < 2 || value.Length > 20)
+                {
+                    throw new ArgumentException("||Input size must be 2-20 letters for states||");
+                }
+                else
+                {
+                    _state = value;
+                }
+            }
+        }
+
+        //public Customer() { }
+
+        //public Customer(string userId, string firstName, string lastName)
+        //{
+        //    UserId = userId;
+        //    FirstName = firstName;
+        //    LastName = lastName;
+        //}
 
         public string GetFullName() => FirstName + " " + LastName;
 

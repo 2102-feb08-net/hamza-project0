@@ -8,12 +8,15 @@ namespace GameStore.Library.Model
 {
     public class Product
     {
-        public string Name { get; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public double Price { get; set; }
 
-        public Product(string name)
-        {
-            Name = name;
-        }
+
+        //public Product(string name)
+        //{
+        //    Name = name;
+        //}
 
     }
 }

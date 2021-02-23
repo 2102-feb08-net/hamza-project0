@@ -86,17 +86,19 @@ namespace GameStore.DataAccess.Entities
 
                 entity.Property(e => e.ProductId).HasColumnName("product_id");
 
+                entity.Property(e => e.Quantity).HasColumnName("quantity");
+
                 entity.HasOne(d => d.Location)
                     .WithMany(p => p.LocationInventories)
                     .HasForeignKey(d => d.LocationId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__LocationI__locat__6A30C649");
+                    .HasConstraintName("FK__LocationI__locat__787EE5A0");
 
                 entity.HasOne(d => d.Product)
                     .WithMany(p => p.LocationInventories)
                     .HasForeignKey(d => d.ProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__LocationI__produ__6B24EA82");
+                    .HasConstraintName("FK__LocationI__produ__797309D9");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -104,6 +106,8 @@ namespace GameStore.DataAccess.Entities
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.CustomerId).HasColumnName("customer_id");
+
+                entity.Property(e => e.LocationId).HasColumnName("location_id");
 
                 entity.Property(e => e.TimePlaced).HasColumnName("time_placed");
 
@@ -113,7 +117,13 @@ namespace GameStore.DataAccess.Entities
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Orders__customer__6383C8BA");
+                    .HasConstraintName("FK__Orders__customer__06CD04F7");
+
+                entity.HasOne(d => d.Location)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.LocationId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Orders__location__07C12930");
             });
 
             modelBuilder.Entity<OrderLine>(entity =>
@@ -126,17 +136,19 @@ namespace GameStore.DataAccess.Entities
 
                 entity.Property(e => e.ProductId).HasColumnName("product_id");
 
+                entity.Property(e => e.Quantity).HasColumnName("quantity");
+
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.OrderLines)
                     .HasForeignKey(d => d.OrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__OrderLine__order__66603565");
+                    .HasConstraintName("FK__OrderLine__order__0A9D95DB");
 
                 entity.HasOne(d => d.Product)
                     .WithMany(p => p.OrderLines)
                     .HasForeignKey(d => d.ProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__OrderLine__produ__6754599E");
+                    .HasConstraintName("FK__OrderLine__produ__0B91BA14");
             });
 
             modelBuilder.Entity<Product>(entity =>
