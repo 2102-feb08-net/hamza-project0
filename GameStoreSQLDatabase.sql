@@ -94,6 +94,9 @@ INSERT INTO LocationInventory(location_id, product_id, quantity) VALUES
 	(4, 1, 5),
 	(4, 3, 5);  -- Charlotte has COD,SSBU
 
+INSERT INTO LocationInventory(location_id, product_id, quantity) VALUES
+	(4, 4, 1);
+
 INSERT INTO OrderLine(order_id, product_id, quantity) VALUES
 	(1, 2, 1),		-- Hamza bought MC and SSBU
 	(1, 3, 2),
@@ -104,21 +107,6 @@ INSERT INTO OrderLine(order_id, product_id, quantity) VALUES
 	(4, 2, 1),		-- Tina bought COD, MC, DS3
 	(4, 4, 3);
 
---CREATE TRIGGER CreateOrderLine
---ON Orders
---AFTER INSERT
---AS
---BEGIN
---	SET NOCOUNT ON;
---	INSERT INTO OrderLine(
---		order_id,
---		product_id,
---		quantity
---	)
---	SELECT
---		things
---	FROM
---		inserted i
 
 
 SELECT * FROM Customers;
@@ -138,3 +126,6 @@ DROP TABLE Orders;
 -- testing Jane bought 1 MC and 1 DS3 from houston
 Delete from Orders where id = 7
 Delete from OrderLine where id = 10
+Delete from Customers where id = 9
+
+

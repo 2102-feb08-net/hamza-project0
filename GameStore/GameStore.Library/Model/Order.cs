@@ -40,6 +40,11 @@ namespace GameStore.Library.Model
             //TimePlaced = new DateTime(DateTime.Now);
         }
 
+
+        /// <summary>
+        /// Adds the product and quantity to the shopping cart.
+        /// Checks if the quantity is greater than 3. If it is, throws an ArgumentException.
+        /// </summary>
         public void AddProduct(Product product, int quantity)
         {
             if (quantity > 3)

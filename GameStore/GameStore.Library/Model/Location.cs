@@ -29,6 +29,10 @@ namespace GameStore.Library.Model
             }
         }
 
+
+        /// <summary>
+        /// Checks if the inventory has the quantities specified in the order.
+        /// </summary>
         public bool IsOrderValid(Order order)
         {
             foreach (var cartItem in order.ShoppingCart)

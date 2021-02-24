@@ -79,7 +79,7 @@ namespace GameStore
                                     Console.WriteLine($"Order {i}\t\tLocationID: {customerOrderHistory[i-1].LocationId}\t" +
                                         $"Time: {customerOrderHistory[i-1].TimePlaced}");
                                     Console.WriteLine();
-                                    Console.WriteLine("Product:\tQuantity:");
+                                    Console.WriteLine("(Product, Quantity)");
                                     foreach (KeyValuePair<Library.Model.Product, int> product in customerOrderHistory[i-1].ShoppingCart)
                                     {
                                         Console.WriteLine($"{product.Key.Name}\t\t{product.Value}");
@@ -330,7 +330,7 @@ namespace GameStore
                                                     double totalPrice = 0;
                                                     foreach (var item in newOrder.ShoppingCart)
                                                     {
-                                                        totalPrice += item.Key.Price;
+                                                        totalPrice += (item.Key.Price * item.Value);
                                                     }
                                                     newOrder.TotalPrice = totalPrice;
                                                     gameStoreRepository.CreateOrder(newOrder);
@@ -344,6 +344,7 @@ namespace GameStore
 
                                                     Console.WriteLine();
                                                     Console.WriteLine("Order Placed.");
+                                                    Console.WriteLine($"Total Price for this order is: ${totalPrice}");
                                                     break;
                                                 }
                                                 else
@@ -353,7 +354,6 @@ namespace GameStore
                                                     Console.WriteLine("Resetting shopping cart");
                                                     newOrder.ShoppingCart = new();
                                                 }
-                                                break;
                                             }
                                             else if (input == "m")
                                             {
