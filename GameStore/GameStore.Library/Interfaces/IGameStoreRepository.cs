@@ -21,6 +21,10 @@ namespace GameStore.Library.Interfaces
 
         void CreateCustomer(Customer customer);
 
+        void CreateOrder(Order order);
+
+        void CreateOrderLine(int productId, int quantity);
+
         void Save();
     }
 }

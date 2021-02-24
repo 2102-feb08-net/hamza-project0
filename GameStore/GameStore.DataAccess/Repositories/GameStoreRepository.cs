@@ -133,6 +133,52 @@ namespace GameStore.DataAccess.Repositories
             });
         }
 
+        public void CreateOrder(Library.Model.Order order)
+        {
+            var newOrder = new Entities.Order
+            {
+                CustomerId = order.CustomerId,
+                LocationId = order.LocationId,
+                TimePlaced = DateTime.Now,
+                TotalPrice = order.TotalPrice
+            };
+            _dbContext.Add(newOrder);
+        }
+
+        public void CreateOrderLine(int productId, int quantity)
+        {
+            var lastOrder = _dbContext.Orders
+                .OrderByDescending(o => o.Id)
+                .FirstOrDefault();
+
+
+            var newOrderLine = new Entities.OrderLine
+            {
+                OrderId = lastOrder.Id,
+                ProductId = productId,
+                Quantity = quantity
+            };
+            _dbContext.Add(newOrderLine);
+        }
+
+        //public IEnumerable<Library.Model.Order> GetLastOrder()
+        //{
+        //    IQueryable<Entities.Customer> customers = _dbContext.Customers
+        //        .Select(c => c)
+        //        .Where(c => (c.FirstName + " " + c.LastName) == name)
+        //        .AsNoTracking();
+
+        //    return customers.Select(cs => new Library.Model.Customer
+        //    {
+        //        Id = cs.Id,
+        //        FirstName = cs.FirstName,
+        //        LastName = cs.LastName,
+        //        UserName = cs.UserName,
+        //        City = cs.City,
+        //        State = cs.State
+        //    });
+        //}
+
         /// <summary>
         /// Persist changes to the data source.
         /// </summary>
@@ -140,5 +186,6 @@ namespace GameStore.DataAccess.Repositories
         {
             _dbContext.SaveChanges();
         }
+
     }
 }

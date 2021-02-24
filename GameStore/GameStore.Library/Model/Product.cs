@@ -18,5 +18,10 @@ namespace GameStore.Library.Model
         //    Name = name;
         //}
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
     }
 }

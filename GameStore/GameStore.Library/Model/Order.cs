@@ -15,7 +15,7 @@ namespace GameStore.Library.Model
         public List<Product> Products { get; set; }
         public List<int> ProductQuanties { get; set; }
 
-        public Dictionary<Product, int> ShoppingCart { get; } = new();
+        public Dictionary<Product, int> ShoppingCart { get; set; } = new();
 
 
         //public Order(Customer customer, Location location)
@@ -40,10 +40,17 @@ namespace GameStore.Library.Model
             //TimePlaced = new DateTime(DateTime.Now);
         }
 
-        //public void AddProduct(Product product, int amount)
-        //{
-        //    _shoppingCart.Add(product, amount);
-        //}
+        public void AddProduct(Product product, int quantity)
+        {
+            if (quantity > 3)
+            {
+                throw new ArgumentException("Quantity cannot be larger than 3.");
+            }
+            else
+            {
+                ShoppingCart.Add(product, quantity);
+            }
+        }
 
     }
 }

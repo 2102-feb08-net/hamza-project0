@@ -104,6 +104,22 @@ INSERT INTO OrderLine(order_id, product_id, quantity) VALUES
 	(4, 2, 1),		-- Tina bought COD, MC, DS3
 	(4, 4, 3);
 
+--CREATE TRIGGER CreateOrderLine
+--ON Orders
+--AFTER INSERT
+--AS
+--BEGIN
+--	SET NOCOUNT ON;
+--	INSERT INTO OrderLine(
+--		order_id,
+--		product_id,
+--		quantity
+--	)
+--	SELECT
+--		things
+--	FROM
+--		inserted i
+
 
 SELECT * FROM Customers;
 SELECT * FROM Products;
@@ -118,5 +134,7 @@ DROP TABLE Orders;
 
 
 
-
-
+-- testing Jane bought 1 MC from houston
+-- testing Jane bought 1 MC and 1 DS3 from houston
+Delete from Orders where id = 7
+Delete from OrderLine where id = 10

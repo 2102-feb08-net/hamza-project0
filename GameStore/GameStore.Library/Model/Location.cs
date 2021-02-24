@@ -29,6 +29,19 @@ namespace GameStore.Library.Model
             }
         }
 
-
+        public bool IsOrderValid(Order order)
+        {
+            foreach (var cartItem in order.ShoppingCart)
+            {
+                foreach (var invItem in Inventory)
+                {
+                    if (invItem.Key.Name == cartItem.Key.Name && invItem.Value >= cartItem.Value)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

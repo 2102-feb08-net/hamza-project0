@@ -33,13 +33,17 @@ namespace GameStore
                 Console.WriteLine();
                 Console.Write("Enter valid menu option, or \"q\" to quit: ");
                 var input = Console.ReadLine();
+
+
+
+
                 if (input.StartsWith("sc "))
                 {
                     var name = input.Split(' ', 2)[1];
                     var customerList = gameStoreRepository.SearchCustomerName(name).ToList();
 
-                    Console.WriteLine();
                     // if no customer with that name
+                    Console.WriteLine();
                     if (customerList.Count == 0)
                     {
                         Console.WriteLine("No customer with that name");
@@ -50,17 +54,7 @@ namespace GameStore
                     {
                         while (true)
                         {
-                            Console.WriteLine();
-                            Console.WriteLine("Choose which customer");
-                            Console.WriteLine();
-                            Console.WriteLine("#\t\tUserId\t\tName");
-
-                            for (int i = 1; i <= customerList.Count; i++)
-                            {
-
-                                Console.WriteLine($"{i}:\t\t{customerList[i-1].UserName}\t\t{customerList[i-1].GetFullName()}");
-                            }
-                            Console.WriteLine();
+                            PrintCustomerList(customerList);
 
                             Console.Write("Pick a customer number to show their order history, or \"m\" to go to main menu: ");
                             input = Console.ReadLine();
@@ -108,6 +102,14 @@ namespace GameStore
                         }
                     }
                 }
+
+
+
+
+
+
+
+
                 // list all the locations. QUESTION: WHAT IF THERE IS NO LOCATION?
                 else if (input == "ll")
                 {
@@ -117,13 +119,8 @@ namespace GameStore
 
                     while (true)
                     {
-                        Console.WriteLine("Listing all Locations");
-                        Console.WriteLine();
-                        Console.WriteLine("#\t\tId\t\tCity\t\tState");
-                        for (int i = 1; i <= allLocations.Count; i++)
-                        {
-                            Console.WriteLine($"{i}\t\t{allLocations[i-1].Id}\t\t{allLocations[i-1].City}\t\t{allLocations[i-1].State}");
-                        }
+
+                        PrintLocationList(allLocations);
 
                         Console.Write("Pick a location number to show its order history, or \"m\" to go to main menu: ");
                         input = Console.ReadLine();
@@ -179,11 +176,236 @@ namespace GameStore
                         }
                     }
                 }
+
+
+
+
+
+
+
+
                 // NEED TO IMPLEMENT
                 else if (input == "o")
                 {
+                    //ask for which customer (store name in string and search customer)
+                    Console.WriteLine();
+                    Console.Write("Which customer would you like to make the order for? (Enter customer name): ");
+                    var customerName = Console.ReadLine();
 
+                    var customerList = gameStoreRepository.SearchCustomerName(customerName).ToList();
+
+                    // if no customer with that name
+                    Console.WriteLine();
+                    if (customerList.Count == 0)
+                    {
+                        Console.WriteLine("No customer with that name");
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        while (true)
+                        {
+                            PrintCustomerList(customerList);
+
+                            Console.Write("Choose which customer, or \"m\" to go to main menu: ");
+                            input = Console.ReadLine();
+
+                            // valid customer #, list all locations and ask for location
+                            if (int.TryParse(input, out var customerNum)
+                                    && customerNum >= 1 && customerNum <= customerList.Count)
+                            {
+                                Library.Model.Customer orderCustomer = customerList[customerNum - 1];
+
+                                var allLocations = gameStoreRepository.GetAllLocations().ToList();
+
+                                while (true)
+                                {
+                                    Console.WriteLine();
+                                    PrintLocationList(allLocations);
+
+                                    Console.WriteLine();
+                                    Console.Write("Choose which location the customer is placing the order for, or \"m\" to go to main menu: ");
+                                    input = Console.ReadLine();
+
+                                    // valid location number. List all the items in inventory
+                                    if (int.TryParse(input, out var locationNum)
+                                                    && locationNum >= 1 && locationNum <= allLocations.Count)
+                                    {
+                                        Library.Model.Location orderLocation = allLocations[locationNum - 1];
+                                        orderLocation.BuildInventory();
+
+                                        Library.Model.Order newOrder = new();
+                                        newOrder.CustomerId = orderCustomer.Id;
+                                        newOrder.LocationId = orderLocation.Id;
+
+                                        Console.WriteLine();
+                                        Console.WriteLine($"The inventory of location with Id {orderLocation.Id} at {orderLocation.City}, {orderLocation.State} is:");
+                                        Console.WriteLine("(#, Product, Quantity)");
+                                        Console.WriteLine();
+                                        int counter = 1;
+                                        foreach (var item in orderLocation.Inventory)
+                                        {
+                                            Console.WriteLine($"{counter}, {item.Key.Name}, {item.Value}");
+                                            counter++;
+                                        }
+
+                                        //keep showing inventory and asking to add or place order
+                                        while (true)
+                                        {
+                                            Console.WriteLine();
+                                            Console.WriteLine("Your shopping cart contains the following items (Product, Quantity): ");
+                                            foreach (var item in newOrder.ShoppingCart)
+                                            {
+                                                Console.WriteLine($"{item.Key.Name}, {item.Value}");
+                                            }
+
+                                            Console.WriteLine();
+                                            Console.WriteLine("Choose what you would like to do");
+                                            Console.WriteLine("add <Product name> <quantity>: add an inventory item with quantity to your shopping cart");
+                                            Console.WriteLine("disc: discard the shopping cart (start from scratch)");
+                                            Console.WriteLine("po: place the order");
+                                            Console.WriteLine("m: go back to the menu");
+                                            Console.WriteLine();
+                                            Console.Write("Enter valid menu option: ");
+                                            input = Console.ReadLine();
+
+                                            if (input.StartsWith("add "))
+                                            {
+                                                string[] inputSplit = input.Split(' ');
+                                                var prodName = "";
+                                                for (int k=1; k<inputSplit.Length-1; k++)
+                                                {
+                                                    if (prodName == "")
+                                                    {
+                                                        prodName += inputSplit[k];
+                                                    }
+                                                    else
+                                                    {
+                                                        prodName += " " + inputSplit[k];
+                                                    }
+                                                }
+                                                var qnt = inputSplit[inputSplit.Length - 1];
+                                                //valid inventory number and quantity is int
+                                                if (IsValidProductName(prodName, orderLocation.Inventory)
+                                                    && int.TryParse(qnt, out var inventoryQnt))
+                                                {
+                                                    try
+                                                    {
+                                                        Library.Model.Product prodToAdd = new();
+                                                        foreach (var item in orderLocation.Inventory)
+                                                        {
+                                                            if (item.Key.Name == prodName)
+                                                            {
+                                                                prodToAdd = item.Key;
+                                                            }
+                                                        }
+                                                        newOrder.AddProduct(prodToAdd, inventoryQnt);
+                                                        Console.WriteLine();
+                                                        Console.WriteLine("Product added.");
+                                                    }
+                                                    catch (ArgumentException ae)
+                                                    {
+                                                        Console.WriteLine();
+                                                        Console.WriteLine(ae.Message);
+                                                        Console.WriteLine();
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine();
+                                                    Console.WriteLine($"Not a valid product name: {prodName}");
+                                                    Console.WriteLine();
+                                                }
+                                            }
+                                            else if (input == "disc")
+                                            {
+                                                newOrder.ShoppingCart = new();
+                                                Console.WriteLine();
+                                                Console.WriteLine("Shopping cart reset.");
+                                            }
+                                            else if (input == "po")
+                                            {
+                                                if (orderLocation.IsOrderValid(newOrder))
+                                                {
+                                                    double totalPrice = 0;
+                                                    foreach (var item in newOrder.ShoppingCart)
+                                                    {
+                                                        totalPrice += item.Key.Price;
+                                                    }
+                                                    newOrder.TotalPrice = totalPrice;
+                                                    gameStoreRepository.CreateOrder(newOrder);
+                                                    gameStoreRepository.Save();
+
+                                                    foreach (var item in newOrder.ShoppingCart)
+                                                    {
+                                                        gameStoreRepository.CreateOrderLine(item.Key.Id, item.Value);
+                                                        gameStoreRepository.Save();
+                                                    }
+
+                                                    Console.WriteLine();
+                                                    Console.WriteLine("Order Placed.");
+                                                    break;
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine();
+                                                    Console.WriteLine("Order not valid, location does not have enough quantity");
+                                                    Console.WriteLine("Resetting shopping cart");
+                                                    newOrder.ShoppingCart = new();
+                                                }
+                                                break;
+                                            }
+                                            else if (input == "m")
+                                            {
+                                                Console.WriteLine();
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                PrintInvalid(input);
+                                            }
+                                        }
+                                        break;
+                                    }
+                                    else if (input == "m")
+                                    {
+                                        Console.WriteLine();
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        PrintInvalid(input);
+                                    }
+                                }
+                                break;
+                            }
+                            else if (input == "m")
+                            {
+                                Console.WriteLine();
+                                break;
+                            }
+                            else
+                            {
+                                PrintInvalid(input);
+                            }
+                        }
+                    }
+                    //ask for which location (store name in string and search location) **NOTE. Need to implement search location query.
+                    //list the location's products and order shopping cart
+                    //ask what they want to add to shopping cart and quantity (or if they want to place order)
+                    //  check if quantity is <= 3
+                    //  check if location's inventory has enough quantity
+                    //  if checks pass, add item/quantity to shopping cart
+                    //if they place order send data to database (need to insert to Orders and OrderLine tables)
+                    //go back to main menu
                 }
+
+
+
+
+
+
+
                 else if (input == "nc")
                 {
                     Library.Model.Customer customer = new();
@@ -306,6 +528,59 @@ namespace GameStore
                 else
                 {
                     PrintInvalid(input);
+                }
+            }
+        }
+
+        private static bool IsValidProductName(string name, Dictionary<Library.Model.Product, int> inventory)
+        {
+            foreach (var item in inventory)
+            {
+                if (item.Key.Name == name)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void PrintLocationList(List<Library.Model.Location> allLocations)
+        {
+            Console.WriteLine("Listing all Locations");
+            Console.WriteLine();
+            Console.WriteLine("#\t\tId\t\tCity\t\tState");
+            for (int i = 1; i <= allLocations.Count; i++)
+            {
+                Console.WriteLine($"{i}\t\t{allLocations[i - 1].Id}\t\t{allLocations[i - 1].City}\t\t{allLocations[i - 1].State}");
+            }
+        }
+
+        private static void PrintCustomerList(List<Library.Model.Customer> customerList)
+        {
+            // if no customer with that name
+            if (customerList.Count == 0)
+            {
+                Console.WriteLine("No customer with that name");
+                Console.WriteLine();
+            }
+            // print all customers with that name
+            else
+            {
+                while (true)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Choose which customer");
+                    Console.WriteLine();
+                    Console.WriteLine("#\t\tUserId\t\tName");
+
+                    for (int i = 1; i <= customerList.Count; i++)
+                    {
+
+                        Console.WriteLine($"{i}:\t\t{customerList[i - 1].UserName}\t\t{customerList[i - 1].GetFullName()}");
+                    }
+                    Console.WriteLine();
+                    break;
                 }
             }
         }
